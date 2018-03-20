@@ -1,0 +1,23 @@
+os:
+    - osx
+osx_image: xcode7.3
+
+language: cpp
+compiler:
+    - clang
+
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+             brew update > /dev/null
+          && travis_wait brew install --force-bottle conan qbs
+      ; fi
+
+install:
+    - qbs setup-qt --detect
+    - qbs setup-toolchains --detect
+    - conan config install https://vuo.org/sites/default/files/conan-macos.zip
+    - conan user
+
+script:
+    - conan create . vuo/stable
+      && conan upload --remote vuo --all --confirm zxing/*
