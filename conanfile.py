@@ -6,7 +6,7 @@ class ZXingConan(ConanFile):
     # zxing-cpp has no tagged releases, so just use package_version.
     # https://github.com/glassechidna/zxing-cpp/issues/29#issuecomment-134047119
     source_version = '0'
-    package_version = '1'
+    package_version = '2'
     version = '%s-%s' % (source_version, package_version)
 
     requires = 'llvm/3.3-1@vuo/stable'
