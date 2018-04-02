@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import platform
 
 class ZXingConan(ConanFile):
     name = 'zxing'
@@ -48,9 +49,16 @@ class ZXingConan(ConanFile):
             cmake.build(target='libzxing')
 
     def package(self):
+        if platform.system() == 'Darwin':
+            libext = 'dylib'
+        elif platform.system() == 'Linux':
+            libext = 'so'
+        else:
+            raise Exception('Unknown platform "%s"' % platform.system())
+
         self.copy('*.h', src='%s/core/src/zxing' % self.source_dir, dst='include/zxing')
         self.copy('*.h', src=self.build_dir, dst='include/zxing')
-        self.copy('libzxing.dylib', src='%s' % self.build_dir, dst='lib')
+        self.copy('libzxing.%s' % libext, src='%s' % self.build_dir, dst='lib')
 
         self.copy('%s.txt' % self.name, src=self.source_dir, dst='license')
 

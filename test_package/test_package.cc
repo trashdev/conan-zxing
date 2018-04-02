@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <zxing/common/StringUtils.h>
 
 int main()

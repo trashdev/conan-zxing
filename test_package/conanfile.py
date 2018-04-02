@@ -12,7 +12,7 @@ class ZXingTestConan(ConanFile):
         self.copy('*', src='lib', dst='lib')
 
     def test(self):
-        self.run('qbs run')
+        self.run('qbs -f "%s"' % self.source_folder)
 
         # Ensure we only link to system libraries and our own libraries.
         if platform.system() == 'Darwin':

@@ -13,7 +13,14 @@ Project {
 		property string binDirectory: {
 			return buildDirectory.substr(0, buildDirectory.lastIndexOf('/', buildDirectory.lastIndexOf('/') - 1)) + "/bin";
 		}
+		cpp.compilerPathByLanguage: {
+			return {
+				"c": binDirectory + '/clang',
+				"cpp": binDirectory + '/clang++',
+			};
+		}
 		cpp.cxxStandardLibrary: 'libstdc++'
+		cpp.linkerPath: binDirectory + '/clang++'
 		cpp.rpaths: [ buildDirectory + '/../../lib' ]
 
 		Depends {
@@ -22,11 +29,6 @@ Project {
 		}
 		Properties {
 			condition: qbs.targetOS.contains('macos')
-			cpp.compilerPathByLanguage: ({
-				c: binDirectory + '/clang',
-				cpp: binDirectory + '/clang++',
-			})
-			cpp.linkerPath: binDirectory + '/clang++'
 			cpp.linkerWrapper: undefined
 			cpp.minimumMacosVersion: '10.10'
 			cpp.target: 'x86_64-apple-macosx10.10'
@@ -35,12 +37,7 @@ Project {
 		}
 		Properties {
 			condition: qbs.targetOS.contains('linux')
-			cpp.compilerPathByLanguage: ({
-				c: '/opt/llvm-3.8.0/bin/clang',
-				cpp: '/opt/llvm-3.8.0/bin/clang++',
-			})
 			cpp.cxxFlags: [ '-fblocks' ]
-			cpp.linkerPath: '/opt/llvm-3.8.0/bin/clang++'
 			cpp.target: 'x86_64-unknown-linux-gnu'
 		}
 
