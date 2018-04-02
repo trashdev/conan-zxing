@@ -26,6 +26,8 @@ class ZXingConan(ConanFile):
         tools.download('https://github.com/glassechidna/zxing-cpp/pull/62.patch', '62.patch')
         tools.patch(patch_file='62.patch', base_path=self.source_dir)
 
+        self.run('mv %s/COPYING %s/%s.txt' % (self.source_dir, self.source_dir, self.name))
+
     def build(self):
         tools.mkdir(self.build_dir)
         with tools.chdir(self.build_dir):
@@ -49,6 +51,8 @@ class ZXingConan(ConanFile):
         self.copy('*.h', src='%s/core/src/zxing' % self.source_dir, dst='include/zxing')
         self.copy('*.h', src=self.build_dir, dst='include/zxing')
         self.copy('libzxing.dylib', src='%s' % self.build_dir, dst='lib')
+
+        self.copy('%s.txt' % self.name, src=self.source_dir, dst='license')
 
     def package_info(self):
         self.cpp_info.libs = ['zxing']
