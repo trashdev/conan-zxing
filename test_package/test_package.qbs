@@ -19,7 +19,7 @@ Project {
 				"cpp": binDirectory + '/clang++',
 			};
 		}
-		cpp.cxxStandardLibrary: 'libstdc++'
+		cpp.cxxStandardLibrary: 'libc++'
 		cpp.linkerPath: binDirectory + '/clang++'
 		cpp.rpaths: [ buildDirectory + '/../../lib' ]
 

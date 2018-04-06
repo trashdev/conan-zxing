@@ -10,7 +10,7 @@ class ZXingConan(ConanFile):
     package_version = '2'
     version = '%s-%s' % (source_version, package_version)
 
-    requires = 'llvm/3.3-2@vuo/stable'
+    build_requires = 'llvm/3.3-5@vuo/stable'
     settings = 'os', 'compiler', 'build_type', 'arch'
     url = 'https://github.com/glassechidna/zxing-cpp'
     license = 'https://github.com/glassechidna/zxing-cpp/blob/master/COPYING'
@@ -38,7 +38,7 @@ class ZXingConan(ConanFile):
             cmake.definitions['CMAKE_CXX_COMPILER'] = self.deps_cpp_info['llvm'].rootpath + '/bin/clang++'
             cmake.definitions['CMAKE_C_COMPILER']   = self.deps_cpp_info['llvm'].rootpath + '/bin/clang'
             cmake.definitions['CMAKE_C_FLAGS'] = cmake.definitions['CMAKE_CXX_FLAGS'] = '-Oz -DNDEBUG'
-            cmake.definitions['CMAKE_CXX_FLAGS'] += ' -stdlib=libstdc++'
+            cmake.definitions['CMAKE_CXX_FLAGS'] += ' -stdlib=libc++ -I' + ' -I'.join(self.deps_cpp_info['llvm'].include_paths)
             cmake.definitions['CMAKE_OSX_ARCHITECTURES'] = 'x86_64'
             cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.10'
             cmake.definitions['OpenCV_FOUND'] = ''

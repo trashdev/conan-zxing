@@ -15,8 +15,8 @@ matrix:
                   sources:
                       - sourceline: 'ppa:beineri/opt-qt594-trusty'
                   packages:
-                      - libasound2-dev
-                      - libjack-dev
+                      - libc++-dev
+                      - libc++abi-dev
                       - qt59qbs
 
 before_install:
