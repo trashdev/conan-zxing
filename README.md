@@ -1,1 +1,1 @@
-[![Build Status](https://travis-ci.org/vuo/conan-zxing.svg?branch=master)](https://travis-ci.org/vuo/conan-zxing)
+[ ![Download](https://api.bintray.com/packages/vuo/conan/zxing%3Avuo/images/download.svg) ](https://bintray.com/vuo/conan/zxing%3Avuo/_latestVersion)
