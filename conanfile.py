@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import os
 import platform
 
 class ZXingConan(ConanFile):
@@ -7,17 +8,22 @@ class ZXingConan(ConanFile):
     # zxing-cpp has no tagged releases, so just use package_version.
     # https://github.com/glassechidna/zxing-cpp/issues/29#issuecomment-134047119
     source_version = '0'
-    package_version = '3'
+    package_version = '4'
     version = '%s-%s' % (source_version, package_version)
 
-    build_requires = 'llvm/3.3-5@vuo/stable'
+    build_requires = (
+        'llvm/5.0.2-1@vuo/stable',
+        'macos-sdk/11.0-0@vuo/stable',
+    )
     settings = 'os', 'compiler', 'build_type', 'arch'
     url = 'https://github.com/glassechidna/zxing-cpp'
     license = 'https://github.com/glassechidna/zxing-cpp/blob/master/COPYING'
     description = 'A library for scanning barcodes'
     source_dir = 'zxing-cpp'
-    build_dir = '_build'
     generators = 'cmake'
+
+    build_dir = '_build'
+    install_dir = '_install'
 
     def source(self):
         self.run("git clone https://github.com/glassechidna/zxing-cpp.git")
@@ -30,23 +36,26 @@ class ZXingConan(ConanFile):
         self.run('mv %s/COPYING %s/%s.txt' % (self.source_dir, self.source_dir, self.name))
 
     def build(self):
+        cmake = CMake(self)
+        cmake.definitions['CONAN_DISABLE_CHECK_COMPILER'] = True
+        cmake.definitions['CMAKE_BUILD_TYPE'] = 'Release'
+        cmake.definitions['CMAKE_CXX_COMPILER'] = self.deps_cpp_info['llvm'].rootpath + '/bin/clang++'
+        cmake.definitions['CMAKE_C_COMPILER']   = self.deps_cpp_info['llvm'].rootpath + '/bin/clang'
+        cmake.definitions['CMAKE_C_FLAGS'] = cmake.definitions['CMAKE_CXX_FLAGS'] = '-Oz -DNDEBUG'
+        cmake.definitions['CMAKE_CXX_FLAGS'] += ' -stdlib=libc++ -I' + ' -I'.join(self.deps_cpp_info['llvm'].include_paths)
+        cmake.definitions['CMAKE_INSTALL_PREFIX'] = '%s/%s' % (os.getcwd(), self.install_dir)
+        cmake.definitions['CMAKE_OSX_ARCHITECTURES'] = 'x86_64;arm64'
+        cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.11'
+        cmake.definitions['OpenCV_FOUND'] = ''
+        cmake.definitions['ICONV_LIBRARY'] = ''
+
         tools.mkdir(self.build_dir)
         with tools.chdir(self.build_dir):
-            cmake = CMake(self)
-
-            cmake.definitions['CMAKE_BUILD_TYPE'] = 'Release'
-            cmake.definitions['CMAKE_CXX_COMPILER'] = self.deps_cpp_info['llvm'].rootpath + '/bin/clang++'
-            cmake.definitions['CMAKE_C_COMPILER']   = self.deps_cpp_info['llvm'].rootpath + '/bin/clang'
-            cmake.definitions['CMAKE_C_FLAGS'] = cmake.definitions['CMAKE_CXX_FLAGS'] = '-Oz -DNDEBUG'
-            cmake.definitions['CMAKE_CXX_FLAGS'] += ' -stdlib=libc++ -I' + ' -I'.join(self.deps_cpp_info['llvm'].include_paths)
-            cmake.definitions['CMAKE_OSX_ARCHITECTURES'] = 'x86_64'
-            cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.10'
-            cmake.definitions['OpenCV_FOUND'] = ''
-            cmake.definitions['ICONV_LIBRARY'] = ''
-
             cmake.configure(source_dir='../%s' % self.source_dir,
-                            build_dir='.')
+                            build_dir='.',
+                            args=['-Wno-dev', '--no-warn-unused-cli'])
             cmake.build(target='libzxing')
+            cmake.install()
 
     def package(self):
         if platform.system() == 'Darwin':
@@ -56,9 +65,8 @@ class ZXingConan(ConanFile):
         else:
             raise Exception('Unknown platform "%s"' % platform.system())
 
-        self.copy('*.h', src='%s/core/src/zxing' % self.source_dir, dst='include/zxing')
-        self.copy('*.h', src=self.build_dir, dst='include/zxing')
-        self.copy('libzxing.%s' % libext, src='%s' % self.build_dir, dst='lib')
+        self.copy('*.h', src='%s/include' % self.install_dir, dst='include')
+        self.copy('libzxing.%s' % libext, src='%s/lib' % self.install_dir, dst='lib')
 
         self.copy('%s.txt' % self.name, src=self.source_dir, dst='license')
 
